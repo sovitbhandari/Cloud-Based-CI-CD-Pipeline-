@@ -1,10 +1,7 @@
-name: CI/CD Pipeline
+name: My First GitHub Actions
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
@@ -12,24 +9,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9]
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v2
       with:
-        python-version: '3.9'
+        python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r src/requirements.txt
+        pip install pytest
 
-    - name: Run Tests
+    - name: Run tests
       run: |
-        echo "No tests available for this example. Add test commands here if needed."
-
-    - name: Deploy Application (Demo)
-      run: |
-        echo "Deploy step here. Connect to your server or deploy infrastructure tools."
+        cd src
+        python -m pytest
