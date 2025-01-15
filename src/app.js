@@ -5,7 +5,7 @@ app.get('/', (req, res) => {
   res.send('Hello World! Deployed via CI/CD pipeline');
 });
 
-const port = process.env.PORT || 3000;
+const port = 80; // Change this to port 80
 app.listen(port, () => {
   console.log(`App is running on port ${port}`);
 });
