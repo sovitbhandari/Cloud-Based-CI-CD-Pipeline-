@@ -1,4 +1,4 @@
-name: My First GitHub Actions
+name: Deploy to EC2
 
 on:
   push:
@@ -6,29 +6,27 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9]
-
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Install Node.js
+      uses: actions/setup-node@v3
       with:
-        python-version: ${{ matrix.python-version }}
+        node-version: '16'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r src/requirements.txt
-        pip install pytest
-
-    - name: Run tests
+    - name: Install Dependencies
       run: |
         cd src
-        python -m pytest
+        npm install
+
+    - name: Deploy to EC2
+      env:
+        EC2_HOST: ${{ secrets.EC2_PUBLIC_IP }}
+        EC2_USER: ubuntu
+        SSH_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+      run: |
+        ssh -i <(echo "$SSH_KEY") -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "cd ~/Cloud-Based-CI-CD-Pipeline- && git pull && cd src && npm install && pm2 restart app || pm2 start app.js --name app"
